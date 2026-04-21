@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Medify — Medicine Authenticity Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0ede8;--surface:#faf9f7;--surface2:#f4f2ee;--border:rgba(30,25,18,.1);--border2:rgba(30,25,18,.06);
+  --text:#1a1710;--muted:#6b6860;--faint:#b0ada7;--inverse:#faf9f7;
+  --green:#1d6b40;--green-bg:rgba(29,107,64,.1);
+  --amber:#9a5a00;--amber-bg:rgba(154,90,0,.1);
+  --red:#b52245;--red-bg:rgba(181,34,69,.1);
+  --blue:#0a4f8a;--blue-bg:rgba(10,79,138,.1);
+  --accent:#0f7a5a;--accent2:#0a5e45;--accent-glow:rgba(15,122,90,.15);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 6px 20px rgba(0,0,0,.08);--shadow-lg:0 16px 48px rgba(0,0,0,.12);
+  --r-sm:.375rem;--r-md:.75rem;--r-lg:1rem;--r-xl:1.5rem;--r-pill:9999px;
+  --font:'Outfit',sans-serif;--mono:'DM Mono',monospace;
+}
+[data-theme="dark"]{
+  --bg:#111210;--surface:#181917;--surface2:#1e1f1c;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.04);
+  --text:#e8e6e1;--muted:#8c8a84;--faint:#4a4845;--inverse:#111210;
+  --green:#3db571;--green-bg:rgba(61,181,113,.1);
+  --amber:#e09a3a;--amber-bg:rgba(224,154,58,.1);
+  --red:#f06080;--red-bg:rgba(240,96,128,.1);
+  --blue:#5aa0e0;--blue-bg:rgba(90,160,224,.1);
+  --accent:#2ab87a;--accent2:#1a9060;--accent-glow:rgba(42,184,122,.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 6px 20px rgba(0,0,0,.35);--shadow-lg:0 16px 48px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;font-size:15px;line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+a{text-decoration:none;color:inherit}
+button{border:none;background:none;cursor:pointer}
+svg{display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+.app{display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr;height:100dvh;overflow:hidden}
+.sidebar{grid-row:1/-1;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.header{grid-column:2;background:color-mix(in oklab,var(--bg) 80%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.main-content{grid-column:2;overflow-y:auto;padding:1.75rem 2rem}
+
+.sidebar-top{padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--border2)}
+.logo{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.logo-icon{width:38px;height:38px;background:var(--accent);border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.logo-text h1{font-size:1.2rem;font-weight:800;letter-spacing:-.02em}
+.logo-text span{font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.status-badge{display:flex;align-items:center;gap:.5rem;background:var(--green-bg);color:var(--green);font-size:.72rem;font-weight:600;padding:.35rem .75rem;border-radius:var(--r-pill);width:fit-content}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sidebar-nav{padding:.75rem;flex:1}
+.nav-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:.5rem .75rem .25rem;margin-top:.5rem}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border-radius:var(--r-md);font-size:.875rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;margin-bottom:2px;border:1px solid transparent}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;opacity:.7}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent);border-color:rgba(15,122,90,.15)}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:.65rem;font-weight:700;padding:.1rem .45rem;border-radius:var(--r-pill);min-width:20px;text-align:center}
+.sidebar-footer{padding:.75rem 1.25rem 1rem;border-top:1px solid var(--border2)}
+.quick-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.qs-item{background:var(--surface2);border-radius:var(--r-md);padding:.6rem .75rem;text-align:center}
+.qs-val{font-size:1.1rem;font-weight:700;line-height:1.2}
+.qs-lbl{font-size:.65rem;color:var(--muted);margin-top:.1rem}
+
+.hdr-title{font-size:1rem;font-weight:700}
+.hdr-actions{display:flex;align-items:center;gap:.75rem}
+.icon-btn{width:38px;height:38px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;transition:all .15s;cursor:pointer}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.notif-btn{position:relative}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--surface)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;height:38px;padding:0 1.1rem;border-radius:var(--r-md);font-size:.85rem;font-weight:600;transition:all .15s;cursor:pointer;border:none}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+.page{display:none}.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:1.5rem}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem}
+.eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem}
+.card-title{font-size:1.1rem;font-weight:700;letter-spacing:-.01em}
+.card-body{font-size:.875rem;color:var(--muted);line-height:1.65;margin-top:.35rem}
+
+.pg-header{margin-bottom:1.5rem}
+.pg-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+.pg-sub{color:var(--muted);font-size:.875rem;margin-top:.2rem}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:1.25rem 1.4rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.12}
+.stat-card.green::before{background:var(--green)}.stat-card.red::before{background:var(--red)}.stat-card.blue::before{background:var(--blue)}.stat-card.amber::before{background:var(--amber)}
+.stat-icon{width:36px;height:36px;border-radius:var(--r-sm);display:grid;place-items:center;margin-bottom:.75rem}
+.stat-icon.green{background:var(--green-bg);color:var(--green)}.stat-icon.red{background:var(--red-bg);color:var(--red)}.stat-icon.blue{background:var(--blue-bg);color:var(--blue)}.stat-icon.amber{background:var(--amber-bg);color:var(--amber)}
+.stat-val{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat-lbl{font-size:.78rem;color:var(--muted);margin-top:.3rem}
+.stat-trend{font-size:.72rem;font-weight:600;margin-top:.5rem}
+.trend-up{color:var(--green)}.trend-dn{color:var(--red)}
+
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem;margin-bottom:1rem}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+
+.activity-list{display:grid;gap:.5rem;margin-top:1rem}
+.act-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border-radius:var(--r-md);background:var(--surface2);font-size:.82rem}
+.act-icon{width:28px;height:28px;border-radius:var(--r-sm);display:grid;place-items:center;flex-shrink:0}
+.act-info{flex:1}
+.act-info strong{display:block;font-weight:600;font-size:.82rem}
+.act-info span{color:var(--muted);font-size:.75rem}
+.act-time{font-size:.72rem;color:var(--faint);font-family:var(--mono)}
+
+.pill{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .65rem;border-radius:var(--r-pill);font-size:.72rem;font-weight:700}
+.pill.ok{background:var(--green-bg);color:var(--green)}.pill.warn{background:var(--amber-bg);color:var(--amber)}.pill.risk{background:var(--red-bg);color:var(--red)}.pill.info{background:var(--blue-bg);color:var(--blue)}
+
+.bar-chart{display:flex;align-items:flex-end;gap:3px;height:50px;margin-top:.75rem}
+.bar{flex:1;border-radius:3px 3px 0 0;background:var(--accent-glow)}.bar.highlight{background:var(--accent)}
+
+/* TRAIL INTEGRITY BAR */
+.trail-integrity{display:flex;gap:3px;margin:.75rem 0;align-items:center}
+.ti-seg{flex:1;height:6px;border-radius:3px}
+.ti-seg.ok{background:var(--green)}.ti-seg.warn{background:var(--amber)}.ti-seg.broken{background:var(--red)}.ti-seg.empty{background:var(--surface2)}
+.ti-label{font-size:.72rem;color:var(--muted);margin-left:.5rem;white-space:nowrap}
+
+/* TRAIL CHAIN */
+.trail-chain{display:grid;gap:0;position:relative}
+.trail-chain::before{content:'';position:absolute;left:17px;top:28px;bottom:28px;width:2px;background:var(--border);z-index:0}
+.trail-node{display:grid;grid-template-columns:36px 1fr;gap:.75rem;align-items:start;position:relative;z-index:1;padding:.55rem 0}
+.trail-pin{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;border:3px solid var(--surface)}
+.trail-pin.signed{background:var(--green)}.trail-pin.warning{background:var(--amber)}.trail-pin.broken{background:var(--red)}.trail-pin.pending{background:var(--surface2);border:2px solid var(--border)}
+.trail-pin.current{background:var(--accent);animation:ring 2s ease-in-out infinite}
+@keyframes ring{0%,100%{box-shadow:0 0 0 3px var(--accent-glow)}50%{box-shadow:0 0 0 7px transparent}}
+.trail-content{padding-top:.35rem}
+.trail-content strong{display:block;font-weight:700;font-size:.85rem}
+.trail-content span{color:var(--muted);font-size:.75rem}
+.trail-meta{display:flex;align-items:center;gap:.5rem;margin-top:.3rem;flex-wrap:wrap}
+
+/* SCAN */
+.scan-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:1.25rem}
+.scan-zone{min-height:270px;border:2px dashed var(--border);border-radius:var(--r-xl);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.scan-zone:hover,.scan-zone.active{border-color:var(--accent)}
+.scan-zone::after{content:'';position:absolute;left:10%;right:10%;height:3px;background:var(--accent);box-shadow:0 0 16px var(--accent);animation:scanline 2.8s ease-in-out infinite;border-radius:var(--r-pill)}
+@keyframes scanline{0%{top:20%}50%{top:78%}100%{top:20%}}
+.scan-icon{color:var(--accent);opacity:.6}
+.scan-hint{font-size:.875rem;color:var(--muted);text-align:center}
+.scan-hint strong{display:block;font-size:1rem;color:var(--text);margin-bottom:.2rem}
+
+.form-group{display:grid;gap:.3rem;margin-bottom:.9rem}
+.form-label{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.03em}
+.form-input{height:44px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface2);padding:0 .9rem;font-size:.875rem;transition:border-color .2s}
+.form-input:focus{outline:none;border-color:var(--accent)}
+.form-select{height:44px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface2);padding:0 .9rem;font-size:.875rem;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='14' height='8' viewBox='0 0 14 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%236b6860' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem}
+.result-box{border-radius:var(--r-lg);padding:1rem 1.1rem;font-size:.875rem;font-weight:500;display:flex;align-items:flex-start;gap:.75rem;margin-top:.25rem}
+.result-box.success{background:var(--green-bg);color:var(--green)}.result-box.error{background:var(--red-bg);color:var(--red)}.result-box.warn{background:var(--amber-bg);color:var(--amber)}.result-box.idle{background:var(--surface2);color:var(--muted)}
+.result-icon{flex-shrink:0;margin-top:.1rem}
+
+.step-flow{display:grid;gap:.5rem;margin-top:.5rem}
+.step-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;border-radius:var(--r-md);background:var(--surface2);font-size:.82rem;border-left:3px solid var(--border)}
+.step-item.done{border-left-color:var(--green)}.step-item.active-step{border-left-color:var(--accent);background:var(--accent-glow)}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);display:grid;place-items:center;font-size:.7rem;font-weight:700;flex-shrink:0}
+.step-item.done .step-num{background:var(--green);color:white;border-color:var(--green)}.step-item.active-step .step-num{background:var(--accent);color:white;border-color:var(--accent)}
+.step-text strong{display:block;font-weight:600}.step-text span{color:var(--muted);font-size:.75rem}
+
+/* TRACK */
+.track-map{position:relative;min-height:280px;border-radius:var(--r-xl);background:linear-gradient(135deg,color-mix(in oklab,var(--blue) 8%,var(--surface2)),var(--surface2));border:1px solid var(--border);overflow:hidden}
+.track-map::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:48px 48px}
+.node-label{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:.25rem .55rem;font-size:.7rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-sm)}
+
+.tl-item{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:start;padding:.75rem .9rem;border-radius:var(--r-md);background:var(--surface2);font-size:.82rem}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+.tl-body strong{display:block;font-weight:600}.tl-body span{color:var(--muted);font-size:.75rem}
+.tl-meta{text-align:right}.tl-time{font-family:var(--mono);font-size:.72rem;color:var(--faint)}
+
+/* ANOMALIES */
+.anom-grid{display:grid;gap:.75rem;margin-top:.75rem}
+.anom-card{display:grid;grid-template-columns:auto 1fr auto;gap:.9rem;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.1rem;transition:box-shadow .2s}
+.anom-card:hover{box-shadow:var(--shadow-md)}
+.anom-card.high{border-left:4px solid var(--red)}.anom-card.medium{border-left:4px solid var(--amber)}
+.anom-icon{width:36px;height:36px;border-radius:var(--r-sm);display:grid;place-items:center;flex-shrink:0}
+.anom-icon.high{background:var(--red-bg);color:var(--red)}.anom-icon.medium{background:var(--amber-bg);color:var(--amber)}
+.anom-title{font-weight:700;font-size:.9rem;margin-bottom:.2rem}.anom-desc{font-size:.8rem;color:var(--muted)}
+.anom-meta{font-size:.72rem;color:var(--faint);font-family:var(--mono);text-align:right}
+.anom-actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+
+/* ADMIN */
+.table-wrap{overflow-x:auto;margin-top:.75rem}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);padding:.6rem .9rem;border-bottom:2px solid var(--border)}
+td{padding:.7rem .9rem;border-bottom:1px solid var(--border2);vertical-align:middle}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:var(--mono);font-size:.8rem}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:100;display:none;place-items:center;padding:1rem}
+.modal-overlay.open{display:grid}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:2rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg);animation:slide-up .25s ease}
+@keyframes slide-up{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:1.2rem;font-weight:800;margin-bottom:.35rem}
+.modal-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.25rem}
+.modal-close{float:right;width:32px;height:32px;border-radius:var(--r-sm);display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.modal-close:hover{background:var(--surface2)}
+
+.divider{height:1px;background:var(--border);margin:1rem 0}
+.tag{display:inline-flex;padding:.2rem .55rem;border-radius:var(--r-pill);font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--muted)}
+.full-w{width:100%}.mt-05{margin-top:.5rem}.mt-1{margin-top:1rem}
+.flex{display:flex}.items-center{align-items:center}.gap-05{gap:.5rem}.gap-1{gap:1rem}.flex-wrap{flex-wrap:wrap}.justify-between{justify-content:space-between}
+.text-sm{font-size:.82rem}.text-xs{font-size:.75rem}.font-bold{font-weight:700}.text-muted{color:var(--muted)}
+
+@media(max-width:1024px){.app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:auto;overflow:auto}.sidebar{grid-row:auto;flex-direction:row;flex-wrap:wrap;padding:.75rem}.sidebar-nav{display:flex;flex-wrap:wrap;padding:.5rem 0}.nav-label,.sidebar-footer{display:none}.header,.main-content{grid-column:auto}.stats-row,.two-col,.three-col{grid-template-columns:1fr 1fr}.scan-layout{grid-template-columns:1fr}}
+@media(max-width:640px){.stats-row,.two-col,.three-col{grid-template-columns:1fr}.main-content{padding:1rem}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">
+      <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="logo-text"><h1>Medify</h1><span>Trail Track Verification</span></div>
+    </div>
+    <div class="status-badge"><span class="status-dot"></span>System Operational</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <button class="nav-item active" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</button>
+    <button class="nav-item" data-page="scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><path d="M16 16h5v5h-5z" opacity=".4"/><path d="M10 3h1M10 7h1M3 10v1M7 10v1M16 10h5"/></svg>Scan & Verify</button>
+    <button class="nav-item" data-page="track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M19.07 4.93l-2.83 2.83M7.76 16.24l-2.83 2.83"/></svg>Track Movement</button>
+    <button class="nav-item" data-page="anomalies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Flag Anomalies<span class="nav-badge" id="anomaly-count">3</span></button>
+    <button class="nav-item" data-page="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Admin Records</button>
+  </div>
+  <div class="sidebar-footer">
+    <div class="text-xs text-muted font-bold" style="margin-bottom:.6rem;letter-spacing:.06em;text-transform:uppercase">Quick Stats</div>
+    <div class="quick-stats">
+      <div class="qs-item"><div class="qs-val" style="color:var(--green)">1,247</div><div class="qs-lbl">Verified Today</div></div>
+      <div class="qs-item"><div class="qs-val" style="color:var(--red)">3</div><div class="qs-lbl">Trail Breaks</div></div>
+      <div class="qs-item"><div class="qs-val" style="color:var(--blue)">98.4%</div><div class="qs-lbl">Chain Integrity</div></div>
+      <div class="qs-item"><div class="qs-val" style="color:var(--amber)">12</div><div class="qs-lbl">Flagged</div></div>
+    </div>
+  </div>
+</aside>
+
+<header class="header">
+  <div><div class="hdr-title" id="page-title">Platform Overview</div></div>
+  <div class="hdr-actions">
+    <button class="icon-btn notif-btn" id="notifBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-dot"></span></button>
+    <button class="icon-btn" id="themeToggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <button class="btn btn-primary" id="scanNowBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/></svg>New Scan</button>
+  </div>
+</header>
+
+<main class="main-content">
+
+<!-- OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="pg-header"><div class="pg-title">Platform Overview</div><div class="pg-sub">Real-time medicine trail track verification across the full supply chain.</div></div>
+  <div class="stats-row">
+    <div class="stat-card green"><div class="stat-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg></div><div class="stat-val">1,247</div><div class="stat-lbl">Trails Verified Today</div><div class="stat-trend trend-up">↑ 12% from yesterday</div></div>
+    <div class="stat-card red"><div class="stat-icon red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div><div class="stat-val">3</div><div class="stat-lbl">Broken Trail Alerts</div><div class="stat-trend trend-dn">↑ 2 new in last hour</div></div>
+    <div class="stat-card blue"><div class="stat-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stat-val">98.4%</div><div class="stat-lbl">Chain Integrity Rate</div><div class="stat-trend trend-up">↑ 0.3% this week</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-val">5</div><div class="stat-lbl">Core Actors Onboarded</div><div class="stat-trend" style="color:var(--muted)">Mfr · Dist · Pharm · User · Reg</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="eyebrow">Recent Activity</div><div class="card-title">Live trail verification feed</div>
+      <div class="activity-list">
+        <div class="act-item"><div class="act-icon" style="background:var(--green-bg);color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="act-info"><strong>MED-24-AZ91-8831 — Full trail intact</strong><span>4/4 checkpoints signed · Mohali Pharmacy</span></div><div class="act-time">09:41</div><span class="pill ok">Authentic</span></div>
+        <div class="act-item"><div class="act-icon" style="background:var(--amber-bg);color:var(--amber)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div><div class="act-info"><strong>MED-24-BC30-2210 — Trail gap detected</strong><span>Distributor checkpoint missing · Chandigarh</span></div><div class="act-time">09:38</div><span class="pill warn">Suspicious</span></div>
+        <div class="act-item"><div class="act-icon" style="background:var(--red-bg);color:var(--red)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div class="act-info"><strong>UNK-CLONE-9912 — No trail found</strong><span>Zero chain history · Unknown origin</span></div><div class="act-time">09:29</div><span class="pill risk">Fake</span></div>
+        <div class="act-item"><div class="act-icon" style="background:var(--green-bg);color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="act-info"><strong>MED-24-QP11-5510 — Full trail intact</strong><span>4/4 checkpoints signed · Patiala Dist.</span></div><div class="act-time">09:17</div><span class="pill ok">Authentic</span></div>
+        <div class="act-item"><div class="act-icon" style="background:var(--green-bg);color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="act-info"><strong>MED-24-XR77-0041 — Full trail intact</strong><span>4/4 checkpoints signed · Ludhiana Pharmacy</span></div><div class="act-time">09:05</div><span class="pill ok">Authentic</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Trail Track Pipeline</div><div class="card-title">How Medify verifies</div>
+      <div class="step-flow mt-1">
+        <div class="step-item done"><div class="step-num">✓</div><div class="step-text"><strong>Scan QR / Barcode</strong><span>Read serial ID from medicine pack</span></div></div>
+        <div class="step-item done"><div class="step-num">✓</div><div class="step-text"><strong>Registry lookup</strong><span>Match GTIN, batch, expiry, status</span></div></div>
+        <div class="step-item active-step"><div class="step-num">3</div><div class="step-text"><strong>Trail chain check</strong><span>Verify every signed handoff checkpoint</span></div></div>
+        <div class="step-item pending" style="border-left-color:var(--border)"><div class="step-num">4</div><div class="step-text"><strong>Gap & route analysis</strong><span>Detect missing or out-of-order nodes</span></div></div>
+        <div class="step-item pending"><div class="step-num">5</div><div class="step-text"><strong>Integrity verdict</strong><span>Authentic / Suspicious / Fake</span></div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="eyebrow" style="margin-top:.25rem">Scan Volume — Last 7 Days</div>
+      <div class="bar-chart mt-05">
+        <div class="bar" style="height:55%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:60%"></div><div class="bar" style="height:85%"></div><div class="bar" style="height:75%"></div><div class="bar highlight" style="height:95%"></div><div class="bar highlight" style="height:88%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="three-col">
+    <div class="card-sm"><div class="eyebrow">System Modules</div><div class="card-title" style="font-size:.95rem">Mobile Scanner</div><div class="card-body">QR / barcode reading and live geolocation capture. Every scan auto-logs a signed trail checkpoint.</div><div class="mt-1"><span class="tag">📱 Android</span> <span class="tag">🍎 iOS</span> <span class="tag">🌐 Web</span></div></div>
+    <div class="card-sm"><div class="eyebrow">System Modules</div><div class="card-title" style="font-size:.95rem">Trail Registry</div><div class="card-body">Immutable chain of custody records — every handoff from manufacturer to patient, GPS-stamped and actor-signed.</div><div class="mt-1"><span class="tag">🔗 Chain</span> <span class="tag">📍 GPS</span> <span class="tag">✍️ Signed</span></div></div>
+    <div class="card-sm"><div class="eyebrow">System Modules</div><div class="card-title" style="font-size:.95rem">Alert Engine</div><div class="card-body">Auto-flags missing checkpoints, route jumps, duplicate serials, and expired stock on every scan.</div><div class="mt-1"><span class="tag">⚡ Real-time</span> <span class="tag">🔔 Push alerts</span></div></div>
+  </div>
+</div>
+
+<!-- SCAN -->
+<div class="page" id="page-scan">
+  <div class="pg-header"><div class="pg-title">Scan & Verify</div><div class="pg-sub">Scan a medicine pack and validate its complete chain-of-custody trail.</div></div>
+  <div class="scan-layout">
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="eyebrow">Scanner</div><div class="card-title">Package authentication</div>
+        <div class="scan-zone mt-1" id="scanZone">
+          <svg class="scan-icon" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <div class="scan-hint"><strong>Position QR or barcode here</strong>Camera opens automatically on a real device</div>
+        </div>
+        <div class="text-xs text-muted mt-1" style="text-align:center">Serial · Batch · Manufacturer · Expiry · Trail checkpoints encoded in code</div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Verification Progress</div><div class="card-title">Live trail check steps</div>
+        <div class="step-flow mt-1" id="live-steps">
+          <div class="step-item pending" id="s1"><div class="step-num">1</div><div class="step-text"><strong>Code scanned</strong><span>Reading serial from barcode/QR</span></div></div>
+          <div class="step-item pending" id="s2"><div class="step-num">2</div><div class="step-text"><strong>Registry lookup</strong><span>Matching serial in central database</span></div></div>
+          <div class="step-item pending" id="s3"><div class="step-num">3</div><div class="step-text"><strong>Trail chain fetched</strong><span>Loading all signed handoff records</span></div></div>
+          <div class="step-item pending" id="s4"><div class="step-num">4</div><div class="step-text"><strong>Gap & route analysis</strong><span>Checking for missing or invalid nodes</span></div></div>
+          <div class="step-item pending" id="s5"><div class="step-num">5</div><div class="step-text"><strong>Integrity verdict</strong><span>Final result computed</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="eyebrow">Verification Form</div><div class="card-title">Enter scan details</div>
+        <div style="margin-top:1rem">
+          <div class="form-group"><label class="form-label">Medicine Serial Number</label><input class="form-input" id="s-serial" value="MED-24-AZ91-8831"/></div>
+          <div class="form-group"><label class="form-label">Scan Location</label><select class="form-select" id="s-location"><option>Mohali Pharmacy Cluster</option><option>Chandigarh Transit Hub</option><option>Patiala Distributor Zone</option><option>Ludhiana Retail Point</option><option>Unknown route point</option></select></div>
+          <div class="form-group"><label class="form-label">Actor Role</label><select class="form-select" id="s-role"><option>Consumer</option><option>Pharmacist</option><option>Distributor</option><option>Regulator</option></select></div>
+          <div class="form-group"><label class="form-label">Trail Checkpoints Found</label><select class="form-select" id="s-checkpoints"><option value="4">4 / 4 checkpoints — Full trail</option><option value="3">3 / 4 checkpoints — 1 node missing</option><option value="0">0 / 4 checkpoints — No trail</option></select></div>
+          <button class="btn btn-primary full-w mt-1" id="runCheck" style="height:46px;font-size:.9rem">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            Run Trail Verification
+          </button>
+          <div class="flex gap-05 flex-wrap mt-05">
+            <button class="btn btn-ghost" id="loadSuspicious" style="flex:1">Load Trail Gap Case</button>
+            <button class="btn btn-ghost" id="loadFake" style="flex:1">Load No-Trail Case</button>
+          </div>
+        </div>
+      </div>
+      <div class="result-box idle" id="scan-result">
+        <svg class="result-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>Fill in the form and run a trail check to see the result here.</div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <div class="eyebrow">Trail Integrity Rules</div><div class="card-title">How the chain is judged</div>
+        <div style="display:grid;gap:.5rem;margin-top:.75rem">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-body"><strong>Green — Full Trail</strong><span>All checkpoints signed in correct order with valid GPS timestamps.</span></div><span class="pill ok">Authentic</span></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--amber)"></div><div class="tl-body"><strong>Amber — Broken Trail</strong><span>One or more handoff nodes missing, delayed, or out-of-sequence. Possible diversion.</span></div><span class="pill warn">Suspicious</span></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--red)"></div><div class="tl-body"><strong>Red — No Trail</strong><span>Zero chain history. Serial unknown or cloned. No verifiable origin at all.</span></div><span class="pill risk">Fake</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACK -->
+<div class="page" id="page-track">
+  <div class="pg-header"><div class="pg-title">Track Movement</div><div class="pg-sub">Full geo-tagged trail from manufacturer to patient — every handoff signed and timestamped.</div></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="eyebrow">Geo Trail Map</div><div class="card-title">Chain of custody route</div>
+      <div class="track-map" style="margin-top:.75rem">
+        <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 60" preserveAspectRatio="none">
+          <path d="M8 12 C 28 10, 36 28, 52 27 S 72 18, 91 44" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="6 5" opacity=".7"/>
+          <circle cx="8" cy="12" r="3" fill="var(--accent)"/><circle cx="30" cy="19" r="2.5" fill="var(--blue)"/><circle cx="52" cy="27" r="3" fill="var(--blue)"/><circle cx="72" cy="33" r="2.5" fill="var(--amber)" opacity=".8"/><circle cx="91" cy="44" r="3" fill="var(--amber)"/>
+        </svg>
+        <div class="node-label" style="top:6%;left:3%">🏭 Manufacturer<br><span style="color:var(--faint);font-size:.62rem">Mumbai · Signed ✓</span></div>
+        <div class="node-label" style="top:29%;left:36%">🚚 Distributor<br><span style="color:var(--faint);font-size:.62rem">Delhi · Signed ✓</span></div>
+        <div class="node-label" style="bottom:10%;right:8%">💊 Pharmacy<br><span style="color:var(--amber);font-size:.62rem">Mohali · ⚠ Delayed</span></div>
+      </div>
+      <div class="text-xs text-muted mt-1">Each node is a GPS-signed handoff. A gap between nodes — or a node in the wrong location — triggers an automatic alert.</div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="eyebrow">Trail Lookup</div><div class="card-title">Trace a product's full chain</div>
+        <div style="margin-top:.75rem">
+          <div class="form-group"><label class="form-label">Serial / Batch ID</label><input class="form-input" id="track-serial" value="MED-24-AZ91-8831"/></div>
+          <button class="btn btn-primary" style="width:100%;height:44px" id="trackBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Fetch Trail</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Trail Chain</div><div class="card-title">MED-24-AZ91-8831</div>
+        <div class="trail-integrity mt-05">
+          <div class="ti-seg ok"></div><div class="ti-seg ok"></div><div class="ti-seg ok"></div><div class="ti-seg warn"></div><div class="ti-seg ok"></div>
+          <span class="ti-label">4/5 nodes clean · 1 delay</span>
+        </div>
+        <div class="trail-chain">
+          <div class="trail-node"><div class="trail-pin signed"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="trail-content"><strong>Manufactured &amp; sealed</strong><span>MediCo Labs, Mumbai · Batch MED-24-AZ91</span><div class="trail-meta"><span class="pill ok">Signed</span><span class="text-xs text-muted">12 Jan 09:00 · GPS: 19.0°N 72.8°E</span></div></div></div>
+          <div class="trail-node"><div class="trail-pin signed"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="trail-content"><strong>Dispatched to national distributor</strong><span>PharmaGen, Delhi · Handoff logged</span><div class="trail-meta"><span class="pill ok">Signed</span><span class="text-xs text-muted">14 Jan 14:22 · GPS: 28.6°N 77.2°E</span></div></div></div>
+          <div class="trail-node"><div class="trail-pin signed"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></div><div class="trail-content"><strong>Regional hub received</strong><span>Chandigarh Transit Hub · Cold chain intact</span><div class="trail-meta"><span class="pill ok">Signed</span><span class="text-xs text-muted">17 Jan 11:05 · GPS: 30.7°N 76.7°E</span></div></div></div>
+          <div class="trail-node"><div class="trail-pin warning"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="trail-content"><strong>Forwarded to pharmacy — delayed</strong><span>Mohali Cluster · 38hr delay vs schedule</span><div class="trail-meta"><span class="pill warn">Delayed</span><span class="text-xs text-muted">19 Jan 08:47 · GPS: 30.8°N 76.5°E</span></div></div></div>
+          <div class="trail-node"><div class="trail-pin current"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="3"/></svg></div><div class="trail-content"><strong>Consumer scan — current node</strong><span>Mohali Pharmacy · Final handoff to patient</span><div class="trail-meta"><span class="pill info">Live</span><span class="text-xs text-muted">Today 09:41 · GPS: 30.8°N 76.5°E</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANOMALIES -->
+<div class="page" id="page-anomalies">
+  <div class="pg-header flex items-center justify-between">
+    <div><div class="pg-title">Flag Anomalies</div><div class="pg-sub">Trail breaks and suspicious chain-of-custody patterns across the network.</div></div>
+    <span class="pill risk" style="font-size:.8rem;padding:.4rem 1rem">3 Active Trail Alerts</span>
+  </div>
+  <div class="three-col" style="margin-bottom:1rem">
+    <div class="card-sm" style="border-left:4px solid var(--red)"><div class="text-xs text-muted font-bold" style="letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem">No Trail</div><div style="font-size:1.5rem;font-weight:800;color:var(--red)">1</div><div class="text-xs text-muted">Serial has zero chain history — likely fake</div></div>
+    <div class="card-sm" style="border-left:4px solid var(--amber)"><div class="text-xs text-muted font-bold" style="letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem">Broken Trail</div><div style="font-size:1.5rem;font-weight:800;color:var(--amber)">2</div><div class="text-xs text-muted">Missing checkpoints or route jumps detected</div></div>
+    <div class="card-sm" style="border-left:4px solid var(--green)"><div class="text-xs text-muted font-bold" style="letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem">Resolved Today</div><div style="font-size:1.5rem;font-weight:800;color:var(--green)">7</div><div class="text-xs text-muted">Cleared after trail was manually verified</div></div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Active Flags</div><div class="card-title">Trail anomalies requiring action</div>
+    <div class="anom-grid">
+      <div class="anom-card high">
+        <div class="anom-icon high"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div>
+        <div>
+          <div class="anom-title">No trail found — UNK-CLONE-9912</div>
+          <div class="anom-desc">Serial does not exist in the registry. Zero chain-of-custody history. Suspected counterfeit with cloned barcode. Location: Unknown route point.</div>
+          <div class="trail-integrity" style="margin:.6rem 0 .35rem"><div class="ti-seg broken"></div><div class="ti-seg broken"></div><div class="ti-seg broken"></div><div class="ti-seg broken"></div><span class="ti-label" style="color:var(--red)">0/4 nodes — No trail</span></div>
+          <div class="anom-actions"><button class="btn btn-ghost" style="height:32px;font-size:.78rem" onclick="resolveAnomaly(this)">Mark Investigated</button><button class="btn" style="background:var(--red);color:white;height:32px;font-size:.78rem">Escalate to Authority</button></div>
+        </div>
+        <div class="anom-meta"><div>09:29 AM</div><span class="pill risk">HIGH</span></div>
+      </div>
+      <div class="anom-card medium">
+        <div class="anom-icon medium"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div>
+        <div>
+          <div class="anom-title">Distributor node missing — MED-24-BC30-2210</div>
+          <div class="anom-desc">Serial registered but the distributor handoff checkpoint is absent. Medicine jumped from factory directly to pharmacy, skipping 2 expected trail nodes. Possible grey-market diversion.</div>
+          <div class="trail-integrity" style="margin:.6rem 0 .35rem"><div class="ti-seg ok"></div><div class="ti-seg broken"></div><div class="ti-seg broken"></div><div class="ti-seg ok"></div><span class="ti-label" style="color:var(--amber)">2/4 nodes — 2 gaps</span></div>
+          <div class="anom-actions"><button class="btn btn-ghost" style="height:32px;font-size:.78rem" onclick="resolveAnomaly(this)">Mark Investigated</button><button class="btn" style="background:var(--amber);color:white;height:32px;font-size:.78rem">Notify Distributor</button></div>
+        </div>
+        <div class="anom-meta"><div>09:38 AM</div><span class="pill warn">MEDIUM</span></div>
+      </div>
+      <div class="anom-card medium">
+        <div class="anom-icon medium"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div>
+          <div class="anom-title">Route jump detected — MED-24-DX55-7761</div>
+          <div class="anom-desc">Trail shows a 340km location jump between two consecutive checkpoints in under 2 hours — physically impossible by road. Indicates a forged trail node or GPS spoof.</div>
+          <div class="trail-integrity" style="margin:.6rem 0 .35rem"><div class="ti-seg ok"></div><div class="ti-seg ok"></div><div class="ti-seg warn"></div><div class="ti-seg ok"></div><span class="ti-label" style="color:var(--amber)">3/4 nodes — 1 jump</span></div>
+          <div class="anom-actions"><button class="btn btn-ghost" style="height:32px;font-size:.78rem" onclick="resolveAnomaly(this)">Mark Investigated</button><button class="btn" style="background:var(--amber);color:white;height:32px;font-size:.78rem">Lock Serial</button></div>
+        </div>
+        <div class="anom-meta"><div>08:52 AM</div><span class="pill warn">MEDIUM</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="pg-header"><div class="pg-title">Admin Records</div><div class="pg-sub">Medicine trail registry, actor management, and complete audit log.</div></div>
+  <div class="two-col" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="eyebrow">Medicine Registry</div><div class="card-title">Registered batches & trail status</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Serial ID</th><th>Batch</th><th>Manufacturer</th><th>Expiry</th><th>Trail Nodes</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">MED-24-AZ91-8831</td><td class="mono">AZ91</td><td>MediCo Labs</td><td>Jun 2026</td><td><span class="pill ok">5/5</span></td><td><span class="pill ok">Authentic</span></td></tr>
+          <tr><td class="mono">MED-24-BC30-2210</td><td class="mono">BC30</td><td>PharmaGen</td><td>Mar 2026</td><td><span class="pill warn">2/4</span></td><td><span class="pill warn">Flagged</span></td></tr>
+          <tr><td class="mono">MED-24-QP11-5510</td><td class="mono">QP11</td><td>SunLife Pharma</td><td>Dec 2025</td><td><span class="pill ok">4/4</span></td><td><span class="pill ok">Authentic</span></td></tr>
+          <tr><td class="mono">MED-24-XR77-0041</td><td class="mono">XR77</td><td>MediCo Labs</td><td>Aug 2026</td><td><span class="pill ok">4/4</span></td><td><span class="pill ok">Authentic</span></td></tr>
+          <tr><td class="mono">MED-24-DX55-7761</td><td class="mono">DX55</td><td>BioRx India</td><td>Sep 2025</td><td><span class="pill warn">3/4 ⚠</span></td><td><span class="pill warn">Suspicious</span></td></tr>
+          <tr><td class="mono">UNK-CLONE-9912</td><td class="mono">—</td><td>Unknown</td><td>—</td><td><span class="pill risk">0/4</span></td><td><span class="pill risk">Blocked</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Registered Actors</div><div class="card-title">Supply chain participants</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Trust</th></tr></thead>
+        <tbody>
+          <tr><td>MediCo Labs</td><td><span class="pill info">Manufacturer</span></td><td>Mumbai</td><td><span class="pill ok">Verified</span></td></tr>
+          <tr><td>PharmaGen Dist.</td><td><span class="pill info">Distributor</span></td><td>Delhi</td><td><span class="pill ok">Verified</span></td></tr>
+          <tr><td>Mohali Rx</td><td><span class="pill" style="background:var(--amber-bg);color:var(--amber)">Pharmacy</span></td><td>Mohali</td><td><span class="pill ok">Verified</span></td></tr>
+          <tr><td>Jalandhar MedHub</td><td><span class="pill" style="background:var(--amber-bg);color:var(--amber)">Pharmacy</span></td><td>Jalandhar</td><td><span class="pill warn">Review</span></td></tr>
+          <tr><td>CDSCO Punjab</td><td><span class="pill risk">Regulator</span></td><td>Chandigarh</td><td><span class="pill ok">Authority</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Audit Log</div><div class="card-title">Complete trail event history</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Timestamp</th><th>Event</th><th>Serial</th><th>Actor</th><th>Location</th><th>Trail Nodes</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Today 09:41</td><td>Consumer scan</td><td class="mono">MED-24-AZ91-8831</td><td>Consumer</td><td>Mohali</td><td><span class="pill ok">5/5 full</span></td><td><span class="pill ok">Authentic</span></td></tr>
+        <tr><td class="mono">Today 09:38</td><td>Pharmacy scan</td><td class="mono">MED-24-BC30-2210</td><td>Pharmacist</td><td>Chandigarh</td><td><span class="pill warn">2/4 gaps</span></td><td><span class="pill warn">Suspicious</span></td></tr>
+        <tr><td class="mono">Today 09:29</td><td>Consumer scan</td><td class="mono">UNK-CLONE-9912</td><td>Consumer</td><td>Unknown</td><td><span class="pill risk">0/4 none</span></td><td><span class="pill risk">Fake/Blocked</span></td></tr>
+        <tr><td class="mono">Today 09:17</td><td>Distributor log</td><td class="mono">MED-24-QP11-5510</td><td>Distributor</td><td>Patiala</td><td><span class="pill ok">4/4 full</span></td><td><span class="pill ok">Authentic</span></td></tr>
+        <tr><td class="mono">Today 09:05</td><td>Consumer scan</td><td class="mono">MED-24-XR77-0041</td><td>Consumer</td><td>Ludhiana</td><td><span class="pill ok">4/4 full</span></td><td><span class="pill ok">Authentic</span></td></tr>
+        <tr><td class="mono">Today 08:52</td><td>Route jump ⚠</td><td class="mono">MED-24-DX55-7761</td><td>Pharmacist</td><td>Jalandhar</td><td><span class="pill warn">3/4 jump</span></td><td><span class="pill warn">Flagged</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- NOTIFICATION MODAL -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('notifModal').classList.remove('open')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-title">🔔 Trail Alerts</div>
+    <div class="modal-sub">Active chain-of-custody flags requiring attention</div>
+    <div class="activity-list">
+      <div class="act-item"><div class="act-icon" style="background:var(--red-bg);color:var(--red)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div><div class="act-info"><strong>No trail — fake blocked</strong><span>UNK-CLONE-9912 · 0/4 nodes · 09:29 AM</span></div></div>
+      <div class="act-item"><div class="act-icon" style="background:var(--amber-bg);color:var(--amber)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><div class="act-info"><strong>Trail gap — 2 nodes missing</strong><span>MED-24-BC30-2210 · 09:38 AM</span></div></div>
+      <div class="act-item"><div class="act-icon" style="background:var(--amber-bg);color:var(--amber)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="act-info"><strong>Route jump — location spoofed?</strong><span>MED-24-DX55-7761 · 08:52 AM</span></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+  const pages={overview:document.getElementById('page-overview'),scan:document.getElementById('page-scan'),track:document.getElementById('page-track'),anomalies:document.getElementById('page-anomalies'),admin:document.getElementById('page-admin')};
+  const titles={overview:'Platform Overview',scan:'Scan & Verify',track:'Track Movement',anomalies:'Flag Anomalies',admin:'Admin Records'};
+  function showPage(id){Object.values(pages).forEach(p=>p.classList.remove('active'));pages[id].classList.add('active');document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));document.querySelector(`[data-page="${id}"]`).classList.add('active');document.getElementById('page-title').textContent=titles[id];}
+  document.querySelectorAll('.nav-item[data-page]').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.page)));
+  document.getElementById('scanNowBtn').addEventListener('click',()=>showPage('scan'));
+
+  const root=document.documentElement;
+  let theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  root.setAttribute('data-theme',theme);
+  const themeBtn=document.getElementById('themeToggle');
+  function paintTheme(){themeBtn.innerHTML=theme==='dark'?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}
+  paintTheme();
+  themeBtn.addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';root.setAttribute('data-theme',theme);paintTheme();});
+
+  document.getElementById('notifBtn').addEventListener('click',()=>document.getElementById('notifModal').classList.add('open'));
+  document.getElementById('notifModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+  const steps=['s1','s2','s3','s4','s5'];
+  function resetSteps(){steps.forEach(id=>{const el=document.getElementById(id);el.className='step-item pending';el.style.borderLeftColor='';el.querySelector('.step-num').textContent=steps.indexOf(id)+1;});}
+  function animateSteps(ok,warn){
+    resetSteps();
+    steps.forEach((id,i)=>{
+      setTimeout(()=>{
+        const el=document.getElementById(id);
+        const last=i===steps.length-1;
+        if(last&&!ok){el.className='step-item';el.style.borderLeftColor=warn?'var(--amber)':'var(--red)';}
+        else if(!ok&&warn&&i>=2){el.className='step-item';el.style.borderLeftColor='var(--amber)';}
+        else{el.className='step-item done';el.querySelector('.step-num').textContent='✓';}
+      },300*(i+1));
+    });
+  }
+
+  const resultBox=document.getElementById('scan-result');
+  function setResult(type,msg){
+    const icons={success:'<svg class="result-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>',warn:'<svg class="result-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>',error:'<svg class="result-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'};
+    resultBox.className='result-box '+type;
+    resultBox.innerHTML=(icons[type]||'')+'<div>'+msg+'</div>';
+  }
+
+  document.getElementById('runCheck').addEventListener('click',()=>{
+    const serial=document.getElementById('s-serial').value.trim();
+    const loc=document.getElementById('s-location').value;
+    const checkpoints=parseInt(document.getElementById('s-checkpoints').value);
+    const isValidSerial=serial.startsWith('MED-');
+    const isUnknownLoc=loc==='Unknown route point';
+    if(isValidSerial&&checkpoints===4&&!isUnknownLoc){
+      animateSteps(true,false);
+      setTimeout(()=>setResult('success','✅ Full trail verified — All 4/4 chain-of-custody checkpoints present, GPS-signed, and in the correct sequence. Route matches the approved supply path. Safe to dispense.'),1700);
+    } else if(isValidSerial&&(checkpoints===3||isUnknownLoc)){
+      animateSteps(false,true);
+      setTimeout(()=>setResult('warn','⚠️ Broken trail — Serial is registered but one or more handoff checkpoints are missing or out of sequence. Possible diversion. Flag for manual review before dispensing.'),1700);
+    } else {
+      animateSteps(false,false);
+      setTimeout(()=>setResult('error','🚫 No trail found — Zero chain-of-custody history for this serial. Not in registry or is a known clone. Do not dispense. Report to CDSCO immediately.'),1700);
+    }
+  });
+
+  document.getElementById('loadSuspicious').addEventListener('click',()=>{
+    document.getElementById('s-serial').value='MED-24-BC30-2210';
+    document.getElementById('s-location').value='Chandigarh Transit Hub';
+    document.getElementById('s-checkpoints').value='3';
+    animateSteps(false,true);
+    setTimeout(()=>setResult('warn','⚠️ Trail gap — Serial found but distributor handoff node is missing. Only 2/4 checkpoints present. Possible grey-market diversion between factory and pharmacy.'),1700);
+  });
+
+  document.getElementById('loadFake').addEventListener('click',()=>{
+    document.getElementById('s-serial').value='UNK-CLONE-9912';
+    document.getElementById('s-location').value='Unknown route point';
+    document.getElementById('s-checkpoints').value='0';
+    animateSteps(false,false);
+    setTimeout(()=>setResult('error','🚫 No trail — Zero chain history. Serial not in registry. Cloned barcode detected. This medicine has no verifiable origin. Block immediately and notify authorities.'),1700);
+  });
+
+  document.getElementById('trackBtn').addEventListener('click',()=>{const s=document.getElementById('track-serial').value;alert(`Fetching full trail for: ${s}\n\nIn production, every GPS-signed handoff node is retrieved from the immutable trail registry and plotted on a live map.`);});
+
+  window.resolveAnomaly=function(btn){
+    const card=btn.closest('.anom-card');
+    card.style.opacity='.4';card.style.pointerEvents='none';
+    const cnt=document.getElementById('anomaly-count');
+    cnt.textContent=Math.max(0,parseInt(cnt.textContent)-1);
+  };
+
+  document.getElementById('scanZone').addEventListener('click',()=>{
+    document.getElementById('scanZone').classList.add('active');
+    setTimeout(()=>document.getElementById('scanZone').classList.remove('active'),2000);
+    setResult('idle','📷 Camera would open here to scan the QR/barcode and automatically fetch the full trail from the registry…');
+  });
+})()</script>
+<script src="api.js"></script>
+<script src="frontend-integration.js"></script>
+</body>
+</html>
