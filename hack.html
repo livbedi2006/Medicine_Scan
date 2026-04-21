@@ -305,8 +305,14 @@ tr:hover td{background:var(--surface2)}
         <div class="scan-zone mt-1" id="scanZone">
           <svg class="scan-icon" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <div class="scan-hint"><strong>Position QR or barcode here</strong>Camera opens automatically on a real device</div>
+          <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;justify-content:center;font-size:.8rem">
+            <button class="btn btn-ghost" id="uploadBtn" style="height:36px;font-size:.85rem;padding:0 .9rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Image</button>
+            <button class="btn btn-ghost" id="browseBtn" style="height:36px;font-size:.85rem;padding:0 .9rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Browse Gallery</button>
+          </div>
         </div>
         <div class="text-xs text-muted mt-1" style="text-align:center">Serial · Batch · Manufacturer · Expiry · Trail checkpoints encoded in code</div>
+        <input type="file" id="imageInput" accept="image/*" style="display:none" />
+        <canvas id="qrCanvas" style="display:none"></canvas>
       </div>
       <div class="card">
         <div class="eyebrow">Verification Progress</div><div class="card-title">Live trail check steps</div>
@@ -509,6 +515,7 @@ tr:hover td{background:var(--surface2)}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script>
 (()=>{
   const pages={overview:document.getElementById('page-overview'),scan:document.getElementById('page-scan'),track:document.getElementById('page-track'),anomalies:document.getElementById('page-anomalies'),admin:document.getElementById('page-admin')};
@@ -549,6 +556,58 @@ tr:hover td{background:var(--surface2)}
     resultBox.className='result-box '+type;
     resultBox.innerHTML=(icons[type]||'')+'<div>'+msg+'</div>';
   }
+
+  // QR Code detection and image upload
+  function decodeQRFromImage(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.getElementById('qrCanvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const qrCode = window.jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (qrCode) {
+          // Successfully decoded QR code
+          const serialData = qrCode.data;
+          document.getElementById('s-serial').value = serialData.includes('MED-') ? serialData : serialData.substring(0, 16);
+          setResult('success', `📱 QR Code detected! Serial extracted: ${serialData.substring(0, 20)}${serialData.length > 20 ? '...' : ''}`);
+          animateSteps(true, false);
+          setTimeout(() => setResult('idle', 'Fill in additional details and run verification to check the trail.'), 2000);
+        } else {
+          setResult('warn', '⚠️ No QR code found in image. Try uploading a clearer image with the QR code centered.');
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Upload button handling
+  document.getElementById('uploadBtn').addEventListener('click', () => {
+    document.getElementById('imageInput').click();
+  });
+
+  // Browse button (same functionality as upload)
+  document.getElementById('browseBtn').addEventListener('click', () => {
+    document.getElementById('imageInput').click();
+  });
+
+  // File input change handler
+  document.getElementById('imageInput').addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type.match('image.*')) {
+        decodeQRFromImage(file);
+      } else {
+        setResult('error', '❌ Please select a valid image file.');
+      }
+    }
+  });
 
   document.getElementById('runCheck').addEventListener('click',()=>{
     const serial=document.getElementById('s-serial').value.trim();
